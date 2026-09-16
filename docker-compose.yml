@@ -1,0 +1,12 @@
+services:
+  reader:
+    build: .
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./data:/data
+    environment:
+      SESSION_TTL_DAYS: "14"
+      MAX_PDF_MB: "50"
+      MAX_PAGES: "300"
+    restart: unless-stopped

@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
+import { useClickOutside } from '../useClickOutside.ts';
 import { api, forgetSession, loadSaved, saveSession } from '../api.ts';
 import { useStore } from '../store.ts';
 import { navigate } from '../App.tsx';
@@ -12,6 +13,8 @@ export function HostMenu() {
   const toast = useStore((s) => s.toastMsg);
   const [open, setOpen] = useState(false);
   const [busy, setBusy] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+  useClickOutside(ref, open, () => setOpen(false));
 
   const run = async (fn: () => Promise<void>) => {
     setBusy(true);
@@ -67,12 +70,12 @@ export function HostMenu() {
   const hostLink = `${location.origin}/s/${session.id}#host=${hostKey ?? ''}`;
 
   return (
-    <div className="relative">
+    <div className="relative" ref={ref}>
       <button onClick={() => setOpen((v) => !v)} className="h-9 rounded-lg border border-zinc-200 bg-white px-3 text-sm font-medium hover:bg-zinc-100">
         Host ▾
       </button>
       {open && (
-        <div className="absolute right-0 top-11 z-30 w-72 rounded-xl border border-zinc-200 bg-white p-2 text-sm shadow-xl" onMouseLeave={() => setOpen(false)}>
+        <div className="absolute right-0 top-11 z-30 w-72 rounded-xl border border-zinc-200 bg-white p-2 text-sm shadow-xl">
           <div className="rounded-lg bg-zinc-50 p-3">
             <div className="text-xs text-zinc-500">Passcode</div>
             <div className="mt-0.5 flex items-center justify-between gap-2">

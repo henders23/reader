@@ -104,6 +104,69 @@ try {
   check('bob follows alice to page 2', bobPage > 0);
   await bob.screenshot({ path: `${shots}/04-bob-following.png` });
 
+  // --- area tool on Alice (page 2 is on screen for both now) ---
+  await alice.keyboard.press('Escape');
+  await alice.keyboard.press('a');
+  const ap2 = await alice.locator('[data-page="2"]').boundingBox();
+  await alice.mouse.move(ap2.x + ap2.width * 0.2, ap2.y + ap2.height * 0.2);
+  await alice.mouse.down();
+  await alice.mouse.move(ap2.x + ap2.width * 0.5, ap2.y + ap2.height * 0.35, { steps: 6 });
+  await alice.mouse.up();
+  await bob.locator('[data-page="2"] svg g rect').first().waitFor({ timeout: 5000 });
+  check('bob sees alice area highlight', true);
+
+  // --- private note: Bob's private pin must not reach Alice ---
+  await bob.locator('aside textarea').first().fill('');
+  await bob.keyboard.press('Escape');
+  await bob.locator('aside [data-ann]').nth(1).click(); // bob's pin card
+  await bob.locator('aside').getByRole('button', { name: 'Make private' }).click();
+  await alice.waitForTimeout(500);
+  const alicePins = await alice.locator('[data-page="1"] button[title*="Bob"]').count();
+  check('private annotation hidden from alice', alicePins === 0);
+  const aliceCount = await alice.evaluate(() => document.querySelectorAll('aside [data-ann]').length);
+  check('alice sidebar excludes private note', aliceCount === 2, `saw ${aliceCount}`);
+
+  // --- laser: Bob draws, Alice sees a stroke ---
+  await bob.keyboard.press('Escape');
+  await bob.keyboard.press('l');
+  const bp2 = await bob.locator('[data-page="2"]').boundingBox();
+  await bob.mouse.move(bp2.x + 100, bp2.y + 100);
+  await bob.mouse.down();
+  await bob.mouse.move(bp2.x + 300, bp2.y + 160, { steps: 10 });
+  await alice.locator('[data-page="2"] polyline').first().waitFor({ timeout: 3000 });
+  check('alice sees bob laser stroke', true);
+  await bob.mouse.up();
+
+  // --- reaction ---
+  await bob.locator('header').getByRole('button', { name: '👍' }).click();
+  await alice.locator('.reaction-float').first().waitFor({ timeout: 3000 });
+  check('alice sees bob reaction', true);
+
+  // --- spotlight: Alice spotlights; Bob (not following) gets pulled ---
+  await bob.keyboard.press('v');
+  await alice.getByRole('button', { name: /Spotlight/ }).click();
+  await bob.getByText(/Following|Spotlight by/).first().waitFor({ timeout: 3000 });
+  check('bob sees spotlight banner', true);
+  await alice.getByRole('button', { name: /Stop spotlight/ }).click();
+
+  // --- host regenerates passcode; old one stops working ---
+  await alice.getByRole('button', { name: 'Host ▾' }).click();
+  await alice.getByRole('button', { name: 'Regenerate passcode' }).click();
+  await alice.waitForTimeout(400);
+  const newCode = (await alice.locator('code').first().textContent()).trim();
+  check('passcode regenerated', newCode !== passcode && /^\w+-\w+-\w+$/.test(newCode), newCode);
+  const oldJoin = await fetch(`${BASE}/api/join`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ passcode, name: 'Eve' }) });
+  check('old passcode rejected', oldJoin.status === 404);
+  await alice.mouse.click(700, 500);
+
+  // --- reconnect: Bob loses the socket and recovers ---
+  await bob.evaluate(() => { for (const ws of []) ws.close(); });
+  await bob.context().setOffline(true);
+  await bob.waitForTimeout(800);
+  await bob.context().setOffline(false);
+  await bob.locator('header').getByText('Live').waitFor({ timeout: 15000 });
+  check('bob reconnected after going offline', true);
+
   // --- export ---
   const token = await alice.evaluate(() => Object.values(JSON.parse(localStorage.getItem('reader:sessions')))[0].token);
   const md = await (await fetch(`${BASE}/api/session/export.md`, { headers: { authorization: `Bearer ${token}` } })).text();

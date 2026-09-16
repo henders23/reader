@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
+import { useClickOutside } from '../useClickOutside.ts';
 import { useStore } from '../store.ts';
 import { Avatar } from './Avatar.tsx';
 import { api } from '../api.ts';
@@ -12,6 +13,8 @@ export function Roster() {
   const token = useStore((s) => s.token);
   const toast = useStore((s) => s.toastMsg);
   const [open, setOpen] = useState<string | null>(null);
+  const ref = useRef<HTMLDivElement>(null);
+  useClickOutside(ref, open !== null, () => setOpen(null));
 
   const remove = async (id: string) => {
     if (!token) return;
@@ -24,7 +27,7 @@ export function Roster() {
   };
 
   return (
-    <div className="flex items-center -space-x-1">
+    <div className="flex items-center -space-x-1" ref={ref}>
       {roster.map((r) => {
         const isMe = r.id === me?.id;
         return (
@@ -43,7 +46,7 @@ export function Roster() {
               {spotlight === r.id && <span className="absolute -bottom-1 -right-1 text-[10px]" title="Spotlighting">🔦</span>}
             </button>
             {open === r.id && !isMe && (
-              <div className="absolute right-0 top-9 z-30 w-40 rounded-lg border border-zinc-200 bg-white p-1 text-sm shadow-lg" onMouseLeave={() => setOpen(null)}>
+              <div className="absolute right-0 top-9 z-30 w-40 rounded-lg border border-zinc-200 bg-white p-1 text-sm shadow-lg">
                 <div className="px-2 py-1 text-xs font-medium text-zinc-500">{r.name}</div>
                 {r.online && (
                   <button

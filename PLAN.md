@@ -187,7 +187,10 @@ Dogfood from the end of M2 with your own group. Everything after M2 is shaped by
 - **No audio in v1**; run it alongside whatever call the group already uses.
 - **Sessions expire** by default; export is the durable artefact.
 
-## 7. Next steps
+## 7. Status
 
-1. Scaffold `server/` and `web/` (M1).
-2. Get a two-browser cursor demo working on day one of M2 and measure latency before building anything on top of presence.
+M1 to M4 are built and covered by a two-browser Playwright test (`npm run e2e`): create, passcode join, cursors, viewport bars, live selection, follow, spotlight, laser, reactions, text/area/pin annotations, threads with Markdown and KaTeX, private notes, sidebar, export, host controls, expiry, reconnect, Docker image.
+
+Deviations from the plan above: thumbnails are rendered lazily in the browser rather than on upload; the `events` table is written but the activity view is derived from annotation and comment timestamps; comment reactions are not implemented (floating reactions are).
+
+Next, driven by real use: confusion heat strip, raise hand, unread markers, PDF/BibTeX export, arXiv/DOI import.
