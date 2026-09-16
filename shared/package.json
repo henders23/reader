@@ -1,0 +1,12 @@
+{
+  "name": "@reader/shared",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "exports": { ".": "./src/index.ts" },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "node --test --import tsx src/*.test.ts"
+  },
+  "devDependencies": { "tsx": "^4.20.0" }
+}
