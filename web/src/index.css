@@ -1,0 +1,82 @@
+@import 'tailwindcss';
+
+:root {
+  color-scheme: light;
+}
+
+html, body, #root {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  font-family: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  background: #f4f4f5;
+  color: #18181b;
+  overscroll-behavior: none;
+}
+
+/* ---- pdf.js text layer (mirrors web/pdf_viewer.css) ---- */
+.textLayer {
+  position: absolute;
+  inset: 0;
+  overflow: clip;
+  line-height: 1;
+  text-align: initial;
+  text-size-adjust: none;
+  forced-color-adjust: none;
+  transform-origin: 0 0;
+  z-index: 2;
+  --min-font-size: 1;
+  --text-scale-factor: calc(var(--total-scale-factor) * var(--min-font-size));
+  --min-font-size-inv: calc(1 / var(--min-font-size));
+}
+.textLayer :is(span, br) {
+  color: transparent;
+  position: absolute;
+  white-space: pre;
+  cursor: text;
+  transform-origin: 0% 0%;
+}
+.textLayer > :not(.markedContent),
+.textLayer .markedContent span:not(.markedContent) {
+  z-index: 1;
+  --font-height: 0;
+  font-size: calc(var(--text-scale-factor) * var(--font-height));
+  --scale-x: 1;
+  --rotate: 0deg;
+  transform: rotate(var(--rotate)) scaleX(var(--scale-x)) scale(var(--min-font-size-inv));
+}
+.textLayer .markedContent {
+  display: contents;
+}
+.textLayer ::selection {
+  background: rgb(79 70 229 / 0.3);
+}
+.tool-area .textLayer, .tool-pin .textLayer, .tool-laser .textLayer {
+  pointer-events: none;
+  user-select: none;
+}
+.tool-area .page-surface { cursor: crosshair; }
+.tool-pin .page-surface { cursor: cell; }
+.tool-laser .page-surface { cursor: none; }
+
+/* ---- comment bodies ---- */
+.md p { margin: 0 0 0.4em; }
+.md p:last-child { margin-bottom: 0; }
+.md code { background: #f4f4f5; padding: 0 0.25em; border-radius: 3px; font-size: 0.9em; }
+.md pre { background: #f4f4f5; padding: 0.5em; border-radius: 6px; overflow-x: auto; }
+.md a { color: #4f46e5; text-decoration: underline; }
+.md ul, .md ol { padding-left: 1.25em; margin: 0.25em 0; }
+.md blockquote { border-left: 3px solid #d4d4d8; margin: 0.25em 0; padding-left: 0.6em; color: #52525b; }
+.md .mention { color: #4f46e5; font-weight: 500; }
+
+@keyframes float-up {
+  0% { transform: translate(-50%, 0) scale(0.6); opacity: 0; }
+  15% { transform: translate(-50%, -10px) scale(1.1); opacity: 1; }
+  100% { transform: translate(-50%, -90px) scale(1); opacity: 0; }
+}
+.reaction-float { animation: float-up 1.8s ease-out forwards; }
+
+@keyframes pop-in { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+.pop-in { animation: pop-in 120ms ease-out; }

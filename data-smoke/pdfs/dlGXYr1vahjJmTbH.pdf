@@ -1,0 +1,69 @@
+%PDF-1.4
+1 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>
+endobj
+2 0 obj
+<< /Length 503 >>
+stream
+BT
+/F1 12 Tf
+14 TL
+72 740 Td
+(Attention Is Not All You Need: A Study of Reading Together) Tj T*
+(Abstract. We observe a 3.2x speedup over the baseline when readers) Tj T*
+(share cursors and selections in real time. This paper describes the) Tj T*
+(method, the evaluation, and the limitations of synchronous reading.) Tj T*
+(1. Introduction) Tj T*
+(Reading groups today rely on screen sharing. The presenter has all) Tj T*
+(the agency and nothing anyone says is anchored to the text afterwards.) Tj T*
+ET
+endstream
+endobj
+3 0 obj
+<< /Type /Page /Parent 6 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 1 0 R >> >> /Contents 2 0 R >>
+endobj
+4 0 obj
+<< /Length 431 >>
+stream
+BT
+/F1 12 Tf
+14 TL
+72 740 Td
+(2. Method) Tj T*
+(Each participant sees a cursor for every other participant, drawn in) Tj T*
+(page-space coordinates so that positions are independent of zoom.) Tj T*
+(Highlights are anchored using text quote and position selectors.) Tj T*
+(3. Results) Tj T*
+(Groups completed the reading 3.2x faster and reported fewer moments) Tj T*
+(of confusion about which passage was under discussion.) Tj T*
+ET
+endstream
+endobj
+5 0 obj
+<< /Type /Page /Parent 6 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 1 0 R >> >> /Contents 4 0 R >>
+endobj
+6 0 obj
+<< /Type /Pages /Kids [3 0 R 5 0 R] /Count 2 >>
+endobj
+7 0 obj
+<< /Type /Catalog /Pages 6 0 R >>
+endobj
+8 0 obj
+<< /Title (Reading Together Fixture) >>
+endobj
+xref
+0 9
+0000000000 65535 f 
+0000000009 00000 n 
+0000000079 00000 n 
+0000000633 00000 n 
+0000000759 00000 n 
+0000001241 00000 n 
+0000001367 00000 n 
+0000001430 00000 n 
+0000001479 00000 n 
+trailer
+<< /Size 9 /Root 7 0 R /Info 8 0 R >>
+startxref
+1534
+%%EOF
