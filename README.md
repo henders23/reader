@@ -1,5 +1,7 @@
 # Reader
 
-Synchronous collaborative PDF reading for academics: live cursors, shared selections, anchored comments, and session recaps. "Miro for PDFs."
+Lean synchronous PDF reading for small groups. Create a session, upload a PDF, share a passcode. Everyone sees each other's cursors and selections, can highlight and comment, and can export the discussion afterwards.
 
-See [PLAN.md](./PLAN.md) for the product and technical plan.
+One self-hosted Node process with SQLite. No accounts.
+
+See [PLAN.md](./PLAN.md) for the plan.

@@ -1,258 +1,193 @@
-# Reader — synchronous collaborative PDF reading
+# Reader — lean synchronous PDF reading
 
-> Working name: **Reader**. "Miro for PDFs": a shared PDF where you can see everyone's cursors, what they're looking at, and what they're saying, in real time. Built for academics reading a paper *together*, live, not just leaving notes for each other.
+> Create a session, upload a PDF, read the passcode out on the call. Everyone who joins sees each other's cursors and selections, can highlight and comment, and can export the discussion afterwards. One self-hosted process, no accounts.
 
-This document is the product and technical plan. It is meant to be argued with and revised.
-
----
-
-## 1. Why this exists
-
-Every existing annotation tool for papers is asynchronous at heart:
-
-| Tool | Model | Gap |
-|---|---|---|
-| Talis Elevate, Perusall | Social annotation for courses | No live presence; comment threads only |
-| Hypothesis | Web/PDF annotation layer | Great anchoring, no synchronous session |
-| Kami, Adobe, Drawboard | Live co-annotation of PDFs | Aimed at classrooms/office, not scholarly reading; no citations, math, or discussion structure |
-| alphaXiv, Fermat's Library | Public paper discussion | Async, public, one paper at a time |
-| Zotero / Paperpile | Library management | Personal notes; no realtime |
-
-A reading group today runs on Zoom + everyone's own PDF + "can you see my screen, I'm on page 4, bottom left." The screen-sharer has all the agency, and nothing anyone says is anchored to the text afterwards.
-
-**Reader's bet:** make the *paper itself* the shared surface. Everyone has their own cursor and scroll position, everyone can point and mark, and everything said is anchored to a passage and survives the call.
-
-Primary user: a small group (2–12) of researchers or grad students in a reading group, lab meeting, or journal club. Secondary: a supervisor and student going through a draft; a seminar of ~30 students with an instructor.
+This is the plan for the lean version. The earlier, larger plan (workspaces, ORCID login, LTI, analytics) is deliberately gone; the objects here are the same, so any of it can be layered on later if there is ever a reason.
 
 ---
 
-## 2. Core experience (MVP)
+## 1. What it is
 
-The MVP is the smallest thing that is obviously better than Zoom + PDF.
+A reading group today runs on Zoom + everyone's own PDF + "I'm on page 4, bottom left." Reader makes the paper itself the shared surface.
 
-### 2.1 Open a paper together
-- Upload a PDF, or paste an arXiv ID / DOI / URL. Get a room link.
-- Join by link. Signed-in users get a persistent identity; guests pick a name and colour. Sign-in via Google, GitHub, and **ORCID** (academics already have one).
-- Roles: owner, editor (annotate), commenter, viewer. Link sharing per role.
+**Who:** you and a handful of colleagues. Sessions of 2–12 people. Trusted participants; the passcode keeps out strangers, not adversaries.
 
-### 2.2 Presence — the "Miro" layer
-Everything here is ephemeral and high frequency. Nothing in this section is stored.
-
-- **Live cursors** with name tags, in page-space coordinates so they land on the same word regardless of zoom or window size.
-- **Viewport indicators**: a translucent rectangle showing what region of which page each person can see. Also shown as coloured ticks on a page strip / minimap on the side, so you can see at a glance "three people are on page 6, one is still on page 2."
-- **Live selection**: when someone drags to select text, everyone sees the selection highlighted in that person's colour as they drag. This is the single most useful presence feature for reading together: "*this* sentence" without saying which one.
-- **Laser pointer / ephemeral ink**: hold a key to draw strokes that fade after ~3 s. For "look at this arrow in Fig. 2."
-- **Follow mode**: click a participant's avatar to lock your viewport to theirs. A facilitator can **spotlight** (bring everyone to me), with an unobtrusive "you're being brought along; click to break away" affordance.
-- **Reactions**: transient emoji that float up from your cursor. Cheap synchronous signal ("agree", "confused", "wait, what?").
-
-### 2.3 Annotations — the persistent layer
-Everything here is stored and appears in the sidebar and in exports.
-
-- **Text highlight**, anchored to text (see §4.3 for how), with a colour and an optional **type tag**: *key claim, question, confusion, disagree, method, definition, todo*. Tags make later filtering and the "confusion heatmap" (§3) possible.
-- **Area highlight** for figures, tables, and equations (a rectangle in page space).
-- **Pinned comment**: a point marker with a thread. For "why is this here?" without a specific passage.
-- **Threads** on any annotation: Markdown, **LaTeX via KaTeX** (`$\alpha$` must just work for this audience), @mentions, reactions, resolve/unresolve.
-- **Sidebar** with two views: *by position* (walk the paper top to bottom) and *by time* (a live feed of what's happening right now). Filters by person, tag, resolved state.
-- **Private notes**: a per-user layer that only you see, toggleable. People will not use a shared tool for their real thoughts unless they can also keep some private.
-
-### 2.4 Activity
-- Activity feed in the sidebar: "Priya highlighted on p.4 · Sam replied to Alex · Jordan joined."
-- Unread indicators on pages and threads since you last looked.
+**Not in scope:** accounts, institutions, libraries, analytics, LMS integration, audio, mobile authoring, editing the PDF.
 
 ---
 
-## 3. Features beyond the MVP (recommended)
+## 2. The experience
 
-Ranked by how much they matter for the *synchronous academic* use case specifically.
+### Host
+1. Open the site, click **Create session**, drop in a PDF, type your name.
+2. Get a **passcode** (three words, e.g. `amber-fox-river`) and a link. Read the passcode aloud or paste it in chat.
+3. Host controls, and nothing more: regenerate passcode, remove a participant, end session, delete session and PDF.
 
-### Tier A — makes the live session work
-1. **Session mode.** Start a "session" inside a room: it has a facilitator, an optional agenda (e.g. sections of the paper as checkpoints), a timer, and a **speaking queue / raise hand**. Everything annotated during the session is grouped, so afterwards there is a "Journal club, 14 Oct" bundle.
-2. **Session recap export.** One click after the session: a Markdown/PDF summary of all highlights and threads in reading order, plus BibTeX for the paper. Push to Zotero as notes. Email digest to participants. This is the artefact that makes people come back.
-3. **Confusion heatmap.** Aggregate *confusion* and *question* tags across participants and render a heat strip in the margin. Facilitators see at a glance where the group got lost. Anonymous by default in classroom settings.
-4. **Built-in voice (huddle).** WebRTC audio via LiveKit or Daily so the group does not need a parallel Zoom. Voice activity shown on the avatar. Recommend shipping *without* this first and validating that people will run Zoom alongside; add when retention data says the friction matters.
+### Participant
+1. Open the site, enter the passcode and a display name. You get a colour.
+2. You are in the paper with everyone else.
 
-### Tier B — academic depth
-5. **Citation resolution.** Click an in-text citation or a bibliography entry and get title/authors/abstract from Crossref / OpenAlex / Semantic Scholar, with "open in a new room" and "add to reading list." Reference extraction via GROBID.
-6. **Import from arXiv / DOI / Semantic Scholar.** Paste an identifier and the PDF plus metadata is fetched. Deduplicate by PDF fingerprint so two groups reading the same preprint can optionally see each other's public annotations.
-7. **Figure and equation lens.** Double-click a figure to open it in a shared zoomable lens that everyone in follow mode sees. Equations get a "render as LaTeX" attempt (via Mathpix-style OCR later).
-8. **Full-text search** across the paper and across all annotations in a group library.
-9. **Compare mode.** Two papers (or two versions of a draft) side by side with linked scrolling. Useful for supervisor/student draft reviews.
-10. **Group library.** A workspace holds many papers, a reading schedule, and cross-paper search of everything the group has ever said.
+### In the session
+**Presence (live, never stored)**
+- Cursors with name tags, in page coordinates, so they land on the same word regardless of zoom or window size.
+- Viewport rectangles: a translucent box showing which part of which page each person can see, plus coloured ticks on a page strip so you can see "three of us are on p.6, Sam is still on p.2."
+- Live text selection: when someone drags to select, everyone sees it in their colour as it happens. This is the single most useful feature; "*this* sentence" without saying which one.
+- Laser / ephemeral ink: hold a key and draw; strokes fade after ~3 s.
+- Follow: click an avatar to lock your view to theirs. Host can **spotlight** to bring everyone along; one click breaks away.
+- Floating emoji reactions from your cursor.
 
-### Tier C — differentiators
-11. **Session replay.** Because all events are logged, scrub through a past session: cursors move, highlights appear, threads unfold. Miro has version history; nobody has this for a reading group. Also the basis for "catch up on what I missed."
-12. **AI assist (opt-in, per room).** Explain a selected passage; define a term in context; summarise a thread; "what did we conclude in this session?"; suggest related papers. Keep it firmly secondary and never let it write into the shared layer without a human clicking.
-13. **Anonymous mode** for teaching: students appear as animals/colours to each other, real names to the instructor.
-14. **Integrations:** Zotero (bi-directional notes), Slack/Discord notifications for new threads, Google Drive / Dropbox import, calendar invites for scheduled sessions.
-15. **Public/embeddable rooms** for open journal clubs and post-publication discussion.
+**Annotations (stored, in the sidebar and the export)**
+- Text highlights anchored to text, with a colour and an optional tag: *key claim, question, confusion, disagree, method, definition*.
+- Area highlights for figures, tables, equations.
+- Pinned comments at a point.
+- Threads on any of the above: Markdown, LaTeX via KaTeX, @mentions, reactions, resolve.
+- Private notes: a layer only you see, toggleable.
+- Sidebar in two modes: *by position* (walk the paper) and *by time* (a live feed). Filter by person, tag, resolved.
 
-### Explicitly out of scope (for now)
-- Editing the PDF itself (form filling, redaction).
-- Mobile-first authoring. Mobile/tablet should be able to *follow* and read threads; authoring can be desktop-only initially.
-- Video.
+**Afterwards**
+- **Export** the session as Markdown: every highlight and thread in reading order, with page numbers and quoted text. Later: PDF and BibTeX.
+- Sessions **expire** (default 14 days, host can extend or end early). Expiry deletes the PDF and all derived text. The expiry date and export button are always visible.
+
+### Later, if the group wants it
+Confusion heat strip in the margin (aggregate *confusion* / *question* tags), raise-hand queue, agenda checkpoints by section, session replay from the event log, arXiv/DOI import, citation lookup, audio huddle.
 
 ---
 
-## 4. Technical design
+## 3. Architecture
 
-### 4.1 Guiding principles
-- **Two realtime tiers, kept apart.** Ephemeral presence (cursors, viewports, selections, laser, reactions) is high-frequency, lossy-OK, never persisted. Annotations and comments are low-frequency, must be durable, queryable, exportable, and permissioned. Mixing them in one channel or one data model is the most common mistake in this space.
-- **Page-space coordinates everywhere.** Every position is `(page, x, y)` with `x, y` normalised to `[0, 1]` of the page's PDF-point dimensions. Never pixels. This makes cursors, highlights, and viewports zoom- and device-independent for free.
-- **Anchor to text, render from rects.** Highlights are stored as text selectors (robust) *and* cached rectangles (fast to draw). If the rects ever disagree with the text (different PDF build, OCR update), the text wins and the rects are recomputed.
-- **Postgres is the source of truth for anything persistent.** A CRDT (Yjs) is the right tool for co-editing *prose*; our persistent objects are discrete and append-mostly (highlights, comments), so rows with realtime fan-out are simpler, queryable, and easier to permission with row-level security. If we later add co-edited shared notes, that one document becomes a Yjs doc.
+### 3.1 Shape
+**One Node process** serves the static frontend, a small HTTP API, and a WebSocket endpoint. State is SQLite plus a data directory of PDFs. Deployable as a single container with one mounted volume.
 
-### 4.2 Recommended stack
-
-| Layer | Choice | Why |
-|---|---|---|
-| Frontend | Next.js (App Router) + TypeScript + Tailwind | Standard, deploys to Vercel trivially |
-| PDF rendering | `pdfjs-dist` directly (not a wrapper) | Need control over the text layer, page virtualisation, and coordinate mapping |
-| Local state | Zustand | Small, fine-grained subscriptions for 60 fps cursor updates |
-| Auth, DB, storage, realtime | **Supabase** (Postgres + RLS, Storage for PDFs, Realtime Broadcast + Presence, Auth with Google/GitHub/ORCID via OIDC) | One backend, no separate WebSocket server to run, RLS gives per-room permissions at the data layer |
-| Presence transport | Supabase Realtime **Broadcast** (cursors, selections, laser) + **Presence** (who is here) | Adequate for rooms ≤ ~50. Wrapped behind a `PresenceProvider` interface so it can be swapped for Liveblocks or a Yjs/PartyKit server if we hit limits |
-| Persistent sync | Postgres `postgres_changes` subscriptions per room | Annotations appear on everyone's screen within ~100 ms of insert |
-| Server-side PDF processing | Node worker (pdf.js in Node, or PyMuPDF in a small Python service) | Per-page text extraction, page dimensions, thumbnails, SHA-256 fingerprint |
-| Math | KaTeX | Fast, synchronous, good enough for comments |
-| Hosting | Vercel (web) + Supabase (backend) | Both already connected to this workspace |
-| Later | LiveKit (audio), GROBID (references), OpenAlex/Crossref/Semantic Scholar APIs (metadata) | |
-
-**Alternatives considered.**
-- *Liveblocks*: fastest path to great presence (cursors, comments, and threads are products). Costs money per MAU and you rent your core differentiator. Reasonable choice if speed to demo matters more than cost.
-- *Yjs + Hocuspocus/PartyKit*: most control and offline-first; overkill for discrete annotations, and means running and scaling a WebSocket tier ourselves.
-- Recommendation: Supabase now, behind interfaces, so either alternative is a two-file swap.
-
-### 4.3 Anchoring highlights (the hard problem)
-
-Follow the W3C Web Annotation model, as Hypothesis does. Each text highlight stores several selectors:
-
-```json
-{
-  "page": 4,
-  "selectors": [
-    { "type": "TextQuoteSelector", "exact": "we observe a 3.2× speedup", "prefix": "Under these conditions ", "suffix": " over the baseline" },
-    { "type": "TextPositionSelector", "start": 1842, "end": 1868 },
-    { "type": "RectSelector", "rects": [[0.12, 0.44, 0.61, 0.46]] }
-  ]
-}
+```
+reader/
+  server/      Node + TypeScript: Hono (HTTP) + ws (WebSocket), better-sqlite3, pdfjs-dist (Node build) for text extraction
+  web/         Vite + React + TypeScript + Tailwind, pdfjs-dist for rendering, Zustand for state, KaTeX
+  data/        sqlite.db, pdfs/<sessionId>.pdf, thumbs/   (mounted volume)
+  Dockerfile
 ```
 
-- `TextPositionSelector` offsets are into the **server-extracted per-page text**, which is canonical for all clients. Client-side pdf.js text extraction can differ across versions; the server copy is what everyone anchors against.
-- On load, try position → verify quote matches → fall back to fuzzy quote search → fall back to rects → mark as *orphaned* (still visible in the sidebar, flagged).
-- Area highlights and pins store only `RectSelector` / a point.
+Why this shape: it is the easiest thing for a colleague at another department to run (`docker run -v ./data:/data -p 8080:8080 reader`), there is no third-party account to create, and a WebSocket server in-process is simpler than any hosted realtime product for rooms of this size.
 
-### 4.4 Presence message shape
+### 3.2 Two realtime tiers, kept separate
+- **Ephemeral presence** (cursors, viewports, selections, laser, reactions): WebSocket messages fanned out to the room from memory. Never written to disk. Coalesced to ≤30 Hz per client; clients interpolate so it looks smooth.
+- **Persistent objects** (annotations, comments, reactions on comments): written to SQLite first, then broadcast to the room. Reconnecting clients fetch the full set over HTTP and then resume the stream.
 
-Broadcast at most ~30 Hz per client, coalesced; clients interpolate incoming cursors so 30 Hz looks smooth.
+Mixing these is the classic mistake; keeping them apart is what keeps the code small.
+
+### 3.3 Coordinates and anchoring
+- Every position is `(page, x, y)` with `x, y` normalised to `[0, 1]` of the page's PDF-point size. Never pixels. Cursors, highlights, and viewports are zoom- and device-independent for free.
+- Highlights follow the W3C Web Annotation selector model, as Hypothesis does. Each stores a text quote (exact + prefix + suffix), a character position into the **server-extracted per-page text**, and cached rectangles for drawing. Re-anchor on load: position → verify quote → fuzzy quote search → rects → mark *orphaned* rather than drop. The server's text is canonical so every client anchors against the same string.
+- Area highlights and pins store only rects / a point.
+
+### 3.4 Data model (SQLite)
+
+```
+sessions      id, title, passcode, host_key_hash, pdf_path, page_count, page_dims json,
+              created_at, expires_at, ended_at
+pages         session_id, page, text, items json            -- canonical text for anchoring
+participants  id, session_id, name, color, token_hash, created_at, last_seen_at, removed_at
+annotations   id, session_id, author_id, kind (highlight|area|pin), page, selectors json,
+              color, tag, private int, created_at, updated_at, deleted_at
+comments      id, annotation_id, parent_id, author_id, body, resolved_at,
+              created_at, edited_at, deleted_at
+reactions     target_type, target_id, participant_id, emoji
+events        id, session_id, actor_id, type, payload json, at   -- feed now; replay later
+```
+
+Eight tables, no joins across sessions, nothing that needs a migration framework beyond a numbered SQL file list.
+
+### 3.5 Identity without accounts
+- **Passcode** is the only thing needed to join. Three random words from a ~2000-word list (~33 bits). Join attempts are rate-limited per IP and per passcode; ten failures lock the passcode for a minute. Sessions expire. That is proportionate for colleagues and a paper, and not a substitute for real auth if the audience ever widens.
+- On joining, the server issues a **participant token** stored in `localStorage`. Reconnecting with it reclaims the same identity, colour, and annotations. Losing it (new browser) means rejoining as a new participant; the host can merge or remove duplicates.
+- The host gets a separate **host key** in `localStorage` at creation time; host-only actions require it. Hosts can also copy a "host link" to move to another device.
+- Everyone is a peer for annotating. The only asymmetry is the host controls listed above.
+
+### 3.6 WebSocket protocol (sketch)
 
 ```ts
-type PresenceState = {
-  userId: string; name: string; color: string;
-  cursor?: { page: number; x: number; y: number };
-  viewport: { page: number; top: number; bottom: number; pageEnd?: number }; // normalised
-  selection?: { page: number; rects: [number, number, number, number][] };
-  tool: 'pointer' | 'highlight' | 'area' | 'pin' | 'laser';
-  following?: string;          // userId being followed
-  handRaised?: boolean;
-  updatedAt: number;
-};
-// Laser strokes and reactions are separate fire-and-forget broadcast events.
+// client → server
+{ t: 'hello', sessionId, participantToken }
+{ t: 'presence', cursor?, viewport, selection?, tool, following? }   // coalesced ≤30 Hz
+{ t: 'laser', page, points }                                          // fire-and-forget
+{ t: 'react', emoji, page, x, y }
+{ t: 'annotation.create' | 'annotation.update' | 'annotation.delete', ... }
+{ t: 'comment.create' | 'comment.update' | 'comment.delete' | 'comment.resolve', ... }
+
+// server → clients
+{ t: 'roster', participants }                     // on join/leave/rename
+{ t: 'presence', from, ...state }                 // relayed
+{ t: 'laser' | 'react', from, ... }               // relayed
+{ t: 'annotation' | 'comment', op, row }          // after persist
+{ t: 'session', op: 'ended' | 'expiring' | 'passcodeChanged' }
 ```
 
-### 4.5 Data model (Postgres)
+Presence is last-write-wins per participant. Annotation edits are last-write-wins by `updated_at`; comments are append-mostly, so no CRDT is needed.
 
-```
-users            id, name, avatar_url, orcid, color
-workspaces       id, name, owner_id                       -- group library
-documents        id, workspace_id, title, sha256, storage_path, page_count,
-                 page_dims jsonb, metadata jsonb (doi, arxiv_id, authors, year), created_by
-document_pages   document_id, page, text, text_items jsonb  -- canonical text for anchoring
-rooms            id, document_id, workspace_id, slug, settings jsonb, created_by
-room_members     room_id, user_id, role (owner|editor|commenter|viewer)
-sessions         id, room_id, facilitator_id, started_at, ended_at, agenda jsonb
-annotations      id, room_id, session_id?, author_id, kind (highlight|area|pin|ink),
-                 page, selectors jsonb, color, tag, visibility (shared|private),
-                 created_at, updated_at, deleted_at
-comments         id, annotation_id, parent_id?, author_id, body (markdown),
-                 mentions uuid[], resolved_at, created_at, edited_at, deleted_at
-reactions        target_type, target_id, user_id, emoji
-events           id, room_id, session_id?, actor_id, type, payload jsonb, at   -- append-only; feeds + replay
-```
+### 3.7 PDF pipeline
+On upload, in-process (queued so a big upload does not block the event loop for long):
+1. Store the file; compute page count and page dimensions.
+2. Extract per-page text with item positions (pdfjs-dist Node build) into `pages`. If a page has no text, mark the session *scanned*; highlights on those pages fall back to area highlights. OCR is not in scope.
+3. Render small thumbnails for the page strip.
+4. Mark ready; the host is redirected into the session.
 
-Row-level security keyed on `room_members` gives per-room permissions without an API layer in the way. Private annotations are filtered by `visibility = 'private' AND author_id = auth.uid()`.
+### 3.8 Rendering
+- Virtualise: render visible pages ±1 at current zoom; thumbnails elsewhere.
+- Per page, three stacked layers: canvas (pdf.js), text layer (selection), and one SVG overlay for highlights, cursors, viewports, laser, positioned in normalised page space and scaled with one CSS transform, so zooming never re-lays-out annotations.
+- Remote cursors update via `requestAnimationFrame` writes to a `transform` on a ref, bypassing React renders.
 
-### 4.6 Rendering and performance
-- Virtualise pages: render the visible pages ±1 at current zoom; keep low-res thumbnails for the rest so scrolling never shows blank.
-- Three stacked layers per page: canvas (pdf.js), text layer (selection + anchoring), and an SVG/DOM **overlay layer** for highlights, cursors, viewports, laser. The overlay is positioned in normalised page space and scaled with a single CSS transform, so zooming never re-lays-out annotations.
-- Cursor updates bypass React re-renders: write straight to a `transform` on the cursor element via a ref, driven by a `requestAnimationFrame` interpolation loop.
-- Text extraction and thumbnails happen once on upload, not on every open.
-
-### 4.7 Ingestion pipeline
-1. Upload to Supabase Storage (or fetch from arXiv/DOI resolver).
-2. Worker: SHA-256 fingerprint → dedupe; page count and dimensions; per-page text with item positions; thumbnails; metadata lookup by DOI/arXiv ID if present (else attempt title extraction from page 1).
-3. If a page has no text layer, flag the document as *scanned*; run OCR (Tesseract or a hosted OCR) in a later phase.
-4. Mark document ready; room opens.
-
-### 4.8 Security and privacy
-- Unpublished manuscripts are the norm here. PDFs are private by default, served via short-lived signed URLs, encrypted at rest. Rooms can be set to expire. Deleting a document deletes the file and all derived text.
-- Never index or train on user content. Say so in plain words in the UI.
-- Guest identities are scoped to a room and cannot see the workspace library.
+### 3.9 Operations
+- `docker compose up` or `node server/dist/index.js` with `DATA_DIR`, `PORT`, `BASE_URL`, `SESSION_TTL_DAYS`.
+- TLS via Caddy or whatever reverse proxy the host already has; WebSockets need `Upgrade` passthrough.
+- Backup is copying the data directory. Restore is copying it back.
+- A nightly sweep deletes expired sessions' files and rows.
+- No telemetry, no external calls at runtime. The KaTeX and pdf.js assets are bundled, so it runs on an internal network.
 
 ---
 
-## 5. Roadmap
+## 4. Milestones
 
-Each phase ends with something usable by a real reading group.
+Each ends with something a real group can use on a call.
 
-**Phase 0 — Skeleton (≈1 week)**
-Repo, Next.js + Supabase scaffolding, auth, upload, ingestion worker, PDF render with text layer and page virtualisation, room links with roles. *Done when:* two people can open the same PDF via a link.
+**M1 — Skeleton (week 1)**
+Create session → upload → passcode → join → render with text layer and page virtualisation. Roster in the corner. Expiry and delete. *Done when:* two people are looking at the same PDF via a passcode.
 
-**Phase 1 — Presence (≈2 weeks)**
-Cursors, viewport indicators, page strip with participant ticks, live selection, follow mode + spotlight, laser, floating reactions. *Done when:* a group of four can read a paper together and point at things without screen sharing.
+**M2 — Presence (week 2)**
+Cursors, viewports, page strip ticks, live selection, follow and spotlight, laser, reactions, reconnect handling. *Done when:* four people read a paper together and point at things without screen sharing. Measure round-trip latency and cursor smoothness with a 12-tab test before moving on.
 
-**Phase 2 — Annotations (≈2–3 weeks)**
-Text and area highlights with robust anchoring, pins, threaded comments with Markdown + KaTeX + mentions, tags, sidebar (by position / by time), activity feed, private notes, unread state. *Done when:* the reading group's discussion survives the call and can be revisited.
+**M3 — Annotations (weeks 3–4)**
+Text and area highlights with the anchoring chain, pins, threads with Markdown + KaTeX + mentions, tags, private notes, sidebar (position / time), unread markers, activity feed. *Done when:* the discussion survives the call.
 
-**Phase 3 — Session mode (≈2 weeks)**
-Start/end session, facilitator, agenda checkpoints, hand raise / speaking queue, timer, confusion heatmap, recap export (Markdown, PDF, BibTeX, Zotero). *Done when:* a journal club prefers this to Zoom + PDF and gets a recap afterwards.
+**M4 — Wrap-up (week 5)**
+Markdown export, host controls polish, session-expiring warnings, Docker image, README for self-hosting, a few end-to-end tests with Playwright driving two browsers.
 
-**Phase 4 — Academic depth (≈3 weeks)**
-arXiv/DOI import, metadata and citation resolution, GROBID references, figure/equation lens, full-text and annotation search, group library, compare mode.
+**Later, driven by use:** confusion heat strip, raise hand, agenda checkpoints, PDF/BibTeX export, replay, arXiv/DOI import, citation lookup, audio.
 
-**Phase 5 — Differentiators (ongoing)**
-Session replay from the event log, built-in audio, AI assist, anonymous classroom mode, integrations, public rooms.
-
-Dogfood from the end of Phase 1 with one real reading group; every phase after that is shaped by what they actually do.
+Dogfood from the end of M2 with your own group. Everything after M2 is shaped by what people actually do on the call.
 
 ---
 
-## 6. Risks and how we handle them
+## 5. Risks
 
 | Risk | Mitigation |
 |---|---|
-| PDF text layers are messy (ligatures, hyphenation, columns), breaking highlight anchoring | Canonical server-side text; multiple selectors with fallback chain; orphaned state instead of silent loss; OCR path for scans |
-| Cursor traffic feels laggy or jittery | 30 Hz coalesced broadcast, client-side interpolation, direct DOM writes; measured on a 12-person room before Phase 1 ships |
-| Large PDFs (200-page theses, scanned books) | Page virtualisation, thumbnails, lazy text-layer creation; cap initial support at ~300 pages and say so |
-| Supabase Broadcast limits at larger rooms | Presence abstracted behind an interface; swap to Liveblocks / Yjs server if a room ever exceeds ~50 |
-| Copyright of uploaded papers | Private by default, no public index, standard takedown flow; public rooms only for content the owner asserts they may share |
-| Nobody wants another tool alongside Zoom | Ship without audio first and measure; recap export gives a reason to use it even if the call happens elsewhere |
-| Feature sprawl toward "another Hypothesis" | Every phase must improve the *synchronous* session; async-only features wait |
+| Messy PDF text layers (ligatures, hyphenation, two columns) break anchoring | Canonical server text; selector fallback chain; *orphaned* state rather than silent loss; area highlights on scanned pages |
+| Cursor traffic feels laggy | 30 Hz coalescing, client interpolation, direct DOM writes; measured at M2 |
+| Large PDFs | Page virtualisation, thumbnails; cap at ~300 pages and say so |
+| Passcode guessed | Three-word codes, rate limiting, expiry; audience is colleagues, stated plainly in the README |
+| Lost `localStorage` means lost identity | Host link + participant token are copyable; host can merge duplicates |
+| Single process is a single point of failure | Fine for one group; SQLite + data dir are trivially backed up; nothing here precludes moving to Postgres later |
+| Unpublished manuscripts | Private by default, expiry deletes everything, no external calls, runs on an internal network if needed |
 
 ---
 
-## 7. Decisions to confirm
+## 6. Decisions taken
 
-These are the choices that materially change the work. Defaults are in bold; the plan above assumes them.
+- **Passcode only**, no accounts, no link secret. Audience is colleagues.
+- **Single self-hosted Node process** with SQLite and a data directory; Docker image for others.
+- **No audio in v1**; run it alongside whatever call the group already uses.
+- **Sessions expire** by default; export is the durable artefact.
 
-1. **Backend:** **Supabase** vs Liveblocks vs self-hosted Yjs. Supabase is already connected to this workspace and keeps one backend.
-2. **Audio in v1?** **No**; validate with Zoom alongside first.
-3. **Auth providers:** **Google + GitHub + ORCID**, plus guest access by link.
-4. **First real users:** which reading group dogfoods Phase 1?
-5. **Name and domain.**
+## 7. Next steps
 
----
-
-## 8. Immediate next steps
-
-1. Confirm the decisions in §7.
-2. Scaffold Phase 0: Next.js app, Supabase project and schema from §4.5, upload → ingest → render.
-3. Build a throwaway two-browser cursor demo on day one of Phase 1 to measure latency before designing anything else on top.
+1. Scaffold `server/` and `web/` (M1).
+2. Get a two-browser cursor demo working on day one of M2 and measure latency before building anything on top of presence.
